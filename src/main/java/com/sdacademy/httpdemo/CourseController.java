@@ -1,9 +1,12 @@
 package com.sdacademy.httpdemo;
 
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Comparator;
 import java.util.List;
 
 @RestController
@@ -28,8 +31,15 @@ public class CourseController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public void saveSource(@RequestBody final Course course) {
+    public ResponseEntity<Object> saveSource(@RequestBody final Course course) {
         courseRepository.add(course);
+
+        final Course insertedCourse = courseRepository.getCourses().stream()
+                .max(Comparator.comparing(Course::getId)).get();
+
+        return ResponseEntity.noContent()
+                .header(HttpHeaders.LOCATION, "/api/courses/" + insertedCourse.getId())
+                .build();
     }
 
     @PutMapping("/{id}")
